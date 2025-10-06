@@ -1,0 +1,11 @@
+services:
+
+  mail_service:
+    container_name: mail_service
+    build: .
+    ports:
+      - "9876:9876"
+    volumes:
+      - .:/app
+    env_file:
+      - .env

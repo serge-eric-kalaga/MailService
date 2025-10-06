@@ -5,9 +5,12 @@ from utils import send_email
 
 
 class EmailRequest(BaseModel):
-    receiver_email: str | list[str]
-    message_text: str
-    email_object: str
+    receiver_email: str | list[str] = Body(
+        ...,
+        description="Email address(es) of the receiver(s) - can be a single email or a list of emails",
+    )
+    email_object: str = Body(default="No Subject", description="Subject of the email")
+    message_text: str = Body(..., description="Content of the email")
 
 
 router = APIRouter()
@@ -15,8 +18,34 @@ router = APIRouter()
 
 @router.post("/send-email")
 async def send_email_endpoint(email_request: EmailRequest):
+    """
+    Endpoint to send an email.
+    - **receiver_email**: Email address(es) of the receiver(s) - can be a single email or a list of emails
+    - **email_object**: Subject of the email
+    - **message_text**: Content of the email
+    Returns a success message if the email is sent successfully, otherwise raises an HTTPException.
+    """
+
+    # Validate receiver_email but keep its original type (str or list[str])
+    if isinstance(email_request.receiver_email, list):
+        if not all(
+            isinstance(email, str) and "@" in email
+            for email in email_request.receiver_email
+        ):
+            raise HTTPException(
+                status_code=400, detail="Invalid email address in the list"
+            )
+        recipients = email_request.receiver_email
+    elif (
+        isinstance(email_request.receiver_email, str)
+        and "@" in email_request.receiver_email
+    ):
+        recipients = email_request.receiver_email
+    else:
+        raise HTTPException(status_code=400, detail="Invalid email address")
+
     success = send_email(
-        receiver_email=email_request.receiver_email,
+        receiver_email=recipients,
         message_text=email_request.message_text,
         email_object=email_request.email_object,
     )

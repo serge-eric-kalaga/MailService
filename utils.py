@@ -53,11 +53,21 @@ def send_email(receiver_email: str | list[str], message_text: str, email_object:
     from_email = FROM_EMAIL if FROM_EMAIL else f"noreply@{EMAIL_DOMAIN}"
     message = MIMEMultipart()
     message["From"] = from_email
-    message["To"] = receiver_email
+
+    # receiver_email peut être une chaîne ou une liste; construire la liste
+    if isinstance(receiver_email, list):
+        recipients_list = receiver_email
+        # Header To doit être une string lisible séparée par des virgules
+        message["To"] = ", ".join(recipients_list)
+    else:
+        recipients_list = [receiver_email]
+        message["To"] = receiver_email
+
     message["Subject"] = email_object
 
-    # Créer une partie de message MIMEText pour le corps du message
-    message_body = MIMEText(str(message_text).encode("utf-8"), "html", "utf-8")
+    # Créer une partie de message MIMEText pour le corps du message (utf-8)
+    # MIMEText attend un texte (str), le third parameter est le charset
+    message_body = MIMEText(str(message_text), "html", "utf-8")
     message.attach(message_body)
 
     try:
@@ -71,8 +81,9 @@ def send_email(receiver_email: str | list[str], message_text: str, email_object:
                 user=EMAIL_USERNAME,
                 password=EMAIL_PASSWORD,
             )
-            server.sendmail(from_email, receiver_email, message.as_string())
-            print(f"Email sent to {receiver_email}")
+            # sendmail accepte une liste de destinataires
+            server.sendmail(from_email, recipients_list, message.as_string())
+            print(f"Email sent to {recipients_list}")
             return True
     except Exception as e:
         print(f"Error, unable to send email {e}")

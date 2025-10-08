@@ -1,7 +1,10 @@
 from fastapi import APIRouter, Body, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-from utils import send_email
+from utils import send_email, get_smtp_server_status
+
+
+router = APIRouter()
 
 
 class EmailRequest(BaseModel):
@@ -13,7 +16,9 @@ class EmailRequest(BaseModel):
     message_text: str = Body(..., description="Content of the email")
 
 
-router = APIRouter()
+class ServerStatusResponse(BaseModel):
+    status: bool
+    message: str
 
 
 @router.post("/send-email")
@@ -52,3 +57,20 @@ async def send_email_endpoint(email_request: EmailRequest):
     if not success:
         raise HTTPException(status_code=500, detail="Error sending email")
     return JSONResponse(content={"message": "Email sent successfully"})
+
+
+@router.get("/smtp-status", response_model=ServerStatusResponse)
+async def smtp_status():
+    """
+    Endpoint to check the status of the SMTP server.
+    Returns a message indicating whether the SMTP server is reachable or not.
+    """
+    try:
+        status = get_smtp_server_status()
+        message = (
+            "SMTP server is reachable." if status else "SMTP server is not reachable."
+        )
+        return ServerStatusResponse(status=status, message=message)
+    except Exception as e:
+        message = f"Error checking SMTP server status: {e}"
+        return ServerStatusResponse(status=False, message=message)

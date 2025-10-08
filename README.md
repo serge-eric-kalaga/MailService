@@ -142,6 +142,21 @@ Envoi d'un email
 }
 ```
 
+#### GET `/api/smtp-status`
+Vérification du statut du serveur SMTP
+
+**Réponse :**
+```json
+{
+  "status": true,
+  "message": "SMTP server is reachable."
+}
+```
+
+**États possibles :**
+- `status: true` : Le serveur SMTP est accessible et les identifiants sont valides
+- `status: false` : Le serveur SMTP n'est pas accessible ou les identifiants sont incorrects
+
 ## 💡 Exemples d'utilisation
 
 ### Envoi d'un email simple
@@ -244,6 +259,57 @@ sendEmail(
 );
 ```
 
+### Vérification du statut SMTP
+
+```bash
+# Vérifier si le serveur SMTP est accessible
+curl http://localhost:9876/api/smtp-status
+```
+
+**Réponse en cas de succès :**
+```json
+{
+  "status": true,
+  "message": "SMTP server is reachable."
+}
+```
+
+**Réponse en cas d'erreur :**
+```json
+{
+  "status": false,
+  "message": "SMTP server is not reachable."
+}
+```
+
+### Intégration du test SMTP en Python
+
+```python
+import requests
+
+def check_smtp_status():
+    try:
+        response = requests.get("http://localhost:9876/api/smtp-status")
+        data = response.json()
+        
+        if data["status"]:
+            print("✅ Serveur SMTP accessible")
+            return True
+        else:
+            print("❌ Serveur SMTP non accessible:", data["message"])
+            return False
+    except Exception as e:
+        print(f"Erreur lors de la vérification : {e}")
+        return False
+
+# Utilisation
+if check_smtp_status():
+    # Procéder à l'envoi d'emails
+    send_email("test@example.com", "Test", "Message de test")
+else:
+    print("Impossible d'envoyer des emails pour le moment")
+```
+
 ## 🔧 Gestion des erreurs
 
 ### Codes de statut HTTP
@@ -272,10 +338,52 @@ sendEmail(
 }
 ```
 
+## 📊 Diagnostic et monitoring
+
+### Vérification de l'état du service
+
+```bash
+# Vérifier que le service répond
+curl http://localhost:9876/
+
+# Vérifier la documentation API
+curl http://localhost:9876/docs
+
+# Tester la connectivité SMTP
+curl http://localhost:9876/api/smtp-status
+```
+
+```bash
+# Test d'envoi d'email (optionnel)
+echo "3. Test d'envoi d'email de diagnostic..."
+curl -X POST "http://localhost:9876/api/send-email" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "receiver_email": "admin@votre-domaine.com",
+    "email_object": "Test de diagnostic - Mail Service",
+    "message_text": "Ce message confirme que le service fonctionne correctement."
+  }'
+
+echo "=== Fin du diagnostic ==="
+```
+
+## 🚨 Sécurité et bonnes pratiques
+
+### Recommandations de sécurité
+
+1. **Utilisez des mots de passe d'application** pour Gmail (pas votre mot de passe principal)
+2. **Limitez l'accès** au port 9876 dans votre pare-feu
+3. **Utilisez HTTPS** en production avec un reverse proxy (nginx, traefik)
+4. **Stockez les secrets** de manière sécurisée (Docker secrets, variables d'environnement chiffrées)
+5. **Surveillez régulièrement** le statut SMTP avec l'endpoint `/api/smtp-status`
+
 
 ---
 
 
 **Développé avec ❤️ par Kalaga Serge**
 
-Pour plus d'informations, consultez la documentation API interactive à l'adresse `http://localhost:9876/docs`
+<!-- Mes coordonnées Github -->
+
+- [Projet GitHub](https://github.com/serge-eric-kalaga/MailService)
+- [Profil GitHub - serge-eric-kalaga](https://github.com/serge-eric-kalaga)

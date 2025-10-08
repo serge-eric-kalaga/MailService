@@ -87,4 +87,22 @@ def send_email(receiver_email: str | list[str], message_text: str, email_object:
             return True
     except Exception as e:
         print(f"Error, unable to send email {e}")
-        raise HTTPException(status_code=500, detail=f"Error sending email: {e}")
+        raise HTTPException(status_code=400, detail=f"Error sending email: {e}")
+
+
+def get_smtp_server_status() -> bool:
+    settings = SETTINGS
+    EMAIL_HOST = settings.EMAIL_HOST
+    EMAIL_PORT = settings.EMAIL_PORT
+    EMAIL_USERNAME = settings.EMAIL_USERNAME
+    EMAIL_PASSWORD = settings.EMAIL_PASSWORD
+
+    try:
+        with smtplib.SMTP(EMAIL_HOST, EMAIL_PORT, timeout=10) as server:
+            server.starttls()
+            server.login(user=EMAIL_USERNAME, password=EMAIL_PASSWORD)
+            server.noop()
+            return True
+    except Exception as e:
+        print(f"SMTP server connection failed: {e}")
+        raise e

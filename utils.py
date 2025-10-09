@@ -8,7 +8,7 @@ from pydantic_settings import PydanticBaseSettingsSource
 
 
 class Settings(BaseSettings):
-    EMAIL_DOMAIN: str
+    EMAIL_DOMAIN: str = "gmail.com"
     EMAIL_HOST: str
     EMAIL_PORT: int = 587
     EMAIL_USERNAME: str

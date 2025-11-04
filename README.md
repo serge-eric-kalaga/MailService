@@ -282,33 +282,6 @@ curl http://localhost:9876/api/smtp-status
 }
 ```
 
-### Intégration du test SMTP en Python
-
-```python
-import requests
-
-def check_smtp_status():
-    try:
-        response = requests.get("http://localhost:9876/api/smtp-status")
-        data = response.json()
-        
-        if data["status"]:
-            print("✅ Serveur SMTP accessible")
-            return True
-        else:
-            print("❌ Serveur SMTP non accessible:", data["message"])
-            return False
-    except Exception as e:
-        print(f"Erreur lors de la vérification : {e}")
-        return False
-
-# Utilisation
-if check_smtp_status():
-    # Procéder à l'envoi d'emails
-    send_email("test@example.com", "Test", "Message de test")
-else:
-    print("Impossible d'envoyer des emails pour le moment")
-```
 
 ## 🔧 Gestion des erreurs
 
@@ -411,6 +384,41 @@ services:
       - local-kafka
     restart: unless-stopped
 ```
+
+## 🐰 Intégration RabbitMQ
+
+Le service peut consommer des messages RabbitMQ pour envoyer automatiquement des emails si l'intégration RabbitMQ est activée via les variables d'environnement (`USE_RABBITMQ`, `RABBITMQ_URL`, `RABBITMQ_EXCHANGE`, `RABBITMQ_ROUTING_KEY`, `RABBITMQ_QUEUE`).
+
+Format JSON attendu pour le message publié sur RabbitMQ :
+
+```json
+{
+  "receiver_email": "user@example.com",
+  "email_object": "Sujet",
+  "message_text": "Contenu du message"
+}
+```
+
+### Variables d'environnement RabbitMQ
+
+| Variable | Description | Exemple |
+|----------|-------------|---------|
+| `USE_RABBITMQ` | Activer l'intégration RabbitMQ | `True` |
+| `RABBITMQ_URL` | URL de connexion RabbitMQ | `amqp://admin:admin@rabbitmq:5672` |
+| `RABBITMQ_EXCHANGE` | Nom de l'exchange | `email_exchange` |
+| `RABBITMQ_ROUTING_KEY` | Routing key pour lier la queue | `email_routing_key` |
+| `RABBITMQ_QUEUE` | Nom de la queue | `email_queue` |
+| `RABBITMQ_DEFAULT_USER` | Utilisateur RabbitMQ | `admin` |
+| `RABBITMQ_DEFAULT_PASS` | Mot de passe RabbitMQ | `admin` |
+
+### Points importants pour l'intégration RabbitMQ
+
+- Le conteneur qui exécute le service doit être sur le même réseau Docker que RabbitMQ afin d'utiliser l'adresse interne (ex. `rabbitmq:5672`). Sans réseau partagé, la résolution de nom et la connexion échoueront.
+- Pour les clients externes (depuis la machine hôte), utilisez l'endpoint exposé de RabbitMQ (ex. `localhost:5672`) si les ports sont mappés.
+- Assurez-vous que `RABBITMQ_URL` pointe vers l'endpoint correct selon le contexte (interne au réseau Docker vs externe).
+- Vérifiez que l'exchange et la routing key configurés correspondent à ceux utilisés par vos producteurs de messages.
+- Le service déclare automatiquement l'exchange de type `TOPIC` et la queue durable, puis les lie avec la routing key spécifiée.
+
 
 ## 🚨 Sécurité et bonnes pratiques
 

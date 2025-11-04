@@ -25,6 +25,15 @@ class Settings(BaseSettings):
     KAFKA_CONSUMER_TOPIC: str = None
     KAFKA_MESSAGE_KEY: str | None = None
 
+    # RabbitMQ configurations
+    USE_RABBITMQ: bool = False
+    RABBITMQ_URL: str = None
+    RABBITMQ_EXCHANGE: str = "email_exchange"
+    RABBITMQ_ROUTING_KEY: str = None
+    RABBITMQ_QUEUE: str = "email_queue"
+    RABBITMQ_DEFAULT_USER: str = None
+    RABBITMQ_DEFAULT_PASS: str = None
+
     class Config:
         env_file = ".env"
 

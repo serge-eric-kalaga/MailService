@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from api import router as api_router
 from kafka_config import consume_messages
+from rabbitmq_config import consume_rabbitmq_messages
 from contextlib import asynccontextmanager
 
 
@@ -10,6 +11,7 @@ async def LifeSpan(app: FastAPI):
     import asyncio
 
     loop = asyncio.get_event_loop()
+    loop.run_in_executor(None, consume_rabbitmq_messages)
     loop.run_in_executor(None, consume_messages)
     yield
     print("-----------------APP ENDED----------------------")

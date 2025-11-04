@@ -8,12 +8,22 @@ from pydantic_settings import PydanticBaseSettingsSource
 
 
 class Settings(BaseSettings):
+    # App configurations
+    PYTHONUNBUFFERED: int = 1
+
+    # Email configurations
     EMAIL_DOMAIN: str = "gmail.com"
     EMAIL_HOST: str
     EMAIL_PORT: int = 587
     EMAIL_USERNAME: str
     EMAIL_PASSWORD: str
     FROM_EMAIL: str | None = None
+
+    # Kafka configurations
+    USE_KAFKA: bool = False
+    KAFKA_BOOTSTRAP_SERVERS: str = None
+    KAFKA_CONSUMER_TOPIC: str = None
+    KAFKA_MESSAGE_KEY: str | None = None
 
     class Config:
         env_file = ".env"

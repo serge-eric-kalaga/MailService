@@ -1,6 +1,18 @@
 from fastapi import FastAPI
-import uvicorn
 from api import router as api_router
+from kafka_config import consume_messages
+from contextlib import asynccontextmanager
+
+
+@asynccontextmanager
+async def LifeSpan(app: FastAPI):
+    print("-----------------APP STARTED----------------------")
+    import asyncio
+
+    loop = asyncio.get_event_loop()
+    loop.run_in_executor(None, consume_messages)
+    yield
+    print("-----------------APP ENDED----------------------")
 
 
 app = FastAPI(
@@ -8,6 +20,7 @@ app = FastAPI(
     version="1.0.0",
     description="Service for sending emails",
     summary="This API provides endpoints for sending emails.",
+    lifespan=LifeSpan,
 )
 
 app.include_router(api_router, prefix="/api", tags=["Mail Service"])

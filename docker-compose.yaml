@@ -9,3 +9,10 @@ services:
       - .:/app
     env_file:
       - .env
+    networks:
+      - local-kafka
+
+networks:
+  local-kafka:
+    name: local-kafka
+    external: true

@@ -156,3 +156,6 @@ data/mdm/data/*
 data/postgres/
 
 .env
+
+docker-compose-kafka.yaml
+docker-compose-rabbitmq.yaml

@@ -367,6 +367,51 @@ curl -X POST "http://localhost:9876/api/send-email" \
 echo "=== Fin du diagnostic ==="
 ```
 
+## 🔁 Intégration Kafka
+
+Le service peut consommer des messages Kafka pour envoyer automatiquement des emails si l'intégration Kafka est activée via les variables d'environnement (`USE_KAFKA`, `KAFKA_BOOTSTRAP_SERVERS`, `KAFKA_CONSUMER_TOPIC`, `KAFKA_MESSAGE_KEY`).
+
+Format JSON attendu pour le message (payload) avec la clé Kafka `email_topic` (vous pouvez modifier la clé via `KAFKA_MESSAGE_KEY`) :
+
+```json
+{
+  "receiver_email": "user@example.com",
+  "email_object": "Sujet",
+  "message_text": "Contenu du message"
+}
+```
+
+Points importants pour une intégration en production ou en environnement conteneurisé :
+
+- Le conteneur qui exécute le service doit être sur le même réseau Docker que le broker Kafka afin d'utiliser l'adresse interne du broker (ex. `broker:9093`). Sans réseau partagé, la résolution de nom et la connexion échoueront.
+- Pour les clients externes (depuis la machine hôte), utilisez l'endpoint exposé du broker (ex. `localhost:9092`) si les ports sont mappés.
+- Assurez-vous que `KAFKA_BOOTSTRAP_SERVERS` pointe vers l'endpoint correct selon le contexte (interne au réseau Docker vs externe).
+- Vérifiez que le topic configuré (`KAFKA_CONSUMER_TOPIC`) correspond au topic sur lequel sont publiés les messages.
+
+Exemple minimal (attacher le service au réseau Docker interne du broker) :
+```yaml
+version: '3.8'
+
+networks:
+  local-kafka:
+    external: true
+
+services:
+  mail_service:
+    image: kalagaserge/mail_service
+    container_name: mail_service
+    ports:
+      - "9876:9876"
+    environment:
+      - USE_KAFKA=True
+      - KAFKA_BOOTSTRAP_SERVERS=broker:9093
+      - KAFKA_CONSUMER_TOPIC=email_topic
+      - KAFKA_MESSAGE_KEY=email_topic
+    networks:
+      - local-kafka
+    restart: unless-stopped
+```
+
 ## 🚨 Sécurité et bonnes pratiques
 
 ### Recommandations de sécurité

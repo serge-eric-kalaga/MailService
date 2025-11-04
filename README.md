@@ -199,66 +199,6 @@ curl -X POST "http://localhost:9876/api/send-email" \
   }'
 ```
 
-### Intégration Python
-
-```python
-import requests
-import json
-
-def send_email(to_email, subject, content):
-    url = "http://localhost:9876/api/send-email"
-    payload = {
-        "receiver_email": to_email,
-        "email_object": subject,
-        "message_text": content
-    }
-    
-    response = requests.post(url, json=payload)
-    
-    if response.status_code == 200:
-        print("Email envoyé avec succès !")
-        return True
-    else:
-        print(f"Erreur lors de l'envoi : {response.text}")
-        return False
-
-# Utilisation
-send_email(
-    to_email="client@example.com",
-    subject="Confirmation de commande",
-    content="<h2>Votre commande est confirmée</h2><p>Numéro : #12345</p>"
-)
-```
-
-### Intégration JavaScript/Node.js
-
-```javascript
-const axios = require('axios');
-
-async function sendEmail(toEmail, subject, content) {
-    try {
-        const response = await axios.post('http://localhost:9876/api/send-email', {
-            receiver_email: toEmail,
-            email_object: subject,
-            message_text: content
-        });
-        
-        console.log('Email envoyé avec succès !');
-        return response.data;
-    } catch (error) {
-        console.error('Erreur lors de l\'envoi :', error.response.data);
-        throw error;
-    }
-}
-
-// Utilisation
-sendEmail(
-    'client@example.com',
-    'Notification importante',
-    '<p>Votre compte a été mis à jour.</p>'
-);
-```
-
 ### Vérification du statut SMTP
 
 ```bash

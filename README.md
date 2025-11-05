@@ -378,5 +378,6 @@ Format JSON attendu pour le message publié sur RabbitMQ :
 
 <!-- Mes coordonnées Github -->
 
+- [Documentation officielle](https://mailservice-doc.vercel.app)
 - [Projet GitHub](https://github.com/serge-eric-kalaga/MailService)
 - [Profil GitHub - serge-eric-kalaga](https://github.com/serge-eric-kalaga)
